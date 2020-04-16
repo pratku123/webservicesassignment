@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Date;
+import java.lang.*;
 import java.util.ArrayList;
 import java.lang.Integer;
 import java.text.SimpleDateFormat;
@@ -13,105 +14,33 @@ import java.net.DatagramSocket;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.util.Collections;
-public class EventOperationsImpl extends UnicastRemoteObject implements EventOperations {
+import javax.jws.WebService;
+
+@WebService(endpointInterface="EventOperations", targetNamespace="http://localhost/test")
+public class EventOperationsImpl implements EventOperations {
 	public Map<String, Map<String,EventDetails> > eventDB;
 	public Map<String, Map<String,EventDetails> > customerDB;
 	private final int MAX_BOOKING_CAPACITY = 100;
 	private final int INITIAL_BOOKING = 0;
 	
-	public EventOperationsImpl() throws RemoteException {
+	public EventOperationsImpl(){
 		super();
 		eventDB = new HashMap<String, Map<String, EventDetails>>();
 		customerDB = new HashMap<String, Map<String, EventDetails> >();
 	}
 	private Map<String, Map<String,EventDetails> > getEventDB() {
-	return this.eventDB;
+		return this.eventDB;
 	}
+	
 	private Map<String, Map<String,EventDetails> > getCustDB() {
 		return this.customerDB;
 	}
-	public static void main(String args[]) {
-	try{
-			String flag="yes";
-			EventOperationsImpl eventOperationsImpl = new EventOperationsImpl();
-			while(true){
-				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-				
-				String managerId = "MTLM1234";
-				String customerId = "MTLC1234";
-				String eventType = "Seminar";
-				
-				System.out.println("ManagerId:");
-				managerId = br.readLine();
-				System.out.println("CustomerId:");
-				customerId = br.readLine();
-				Date date = new Date();
-				SimpleDateFormat f = new SimpleDateFormat("DDMMYY");
-				String date1 = f.format(date);
-				String eventId = "MTLM"+date1;
-				
-				System.out.println("EventId");
-				eventId = br.readLine();
-
-				System.out.println("EventType:");
-				eventType = br.readLine();
-				
-				System.out.println("requestType 1,2,3, 4-BookEvent, 5.get booking schedule, 6.cancel Event");
-				int requestType = Integer.parseInt(br.readLine());
-				System.out.println(requestType);
-				if (requestType == 1)
-				eventOperationsImpl.addEvent(managerId, eventId, eventType, 20);
-				else if(requestType==2)
-				eventOperationsImpl.removeEvent(managerId, eventId, eventType);
-				else if(requestType==3) {
-					Map<String, EventDetails> events = eventOperationsImpl.listEventAvailability(managerId, eventType);
-					System.out.println("events=="+events.toString());}
-				else if(requestType==4) {
-					String response = eventOperationsImpl.bookEvent(customerId, eventId, eventType);
-					System.out.println("book event: "+response);
-				} else if(requestType ==5){
-					List<String> list1= eventOperationsImpl.getBookingSchedule(customerId);
-					System.out.println("getBookingSchedule"+list1.toString());
-				} else if(requestType ==6){
-					String r = eventOperationsImpl.cancelEvent(customerId, eventId, eventType);
-					System.out.println("cancel event:"+r);
-				}
-				System.out.println("eventDB:"+eventOperationsImpl.getEventDB().toString());
-				Map<String, Map<String,EventDetails> > eventDB1 = eventOperationsImpl.getEventDB();
-				for(String eventType1: eventDB1.keySet()) {
-					System.out.println("eventType====="+eventType1+"");
-					Map<String, EventDetails> eventMap = eventDB1.get(eventType1);
-					for(String eventId1: eventMap.keySet()) {
-					System.out.println("=====EventId===="+eventId1);
-						EventDetails eventDetails = eventMap.get(eventId1);
-						System.out.println("maxBookingCapacity="+eventDetails.getMaxBookingCapacity());
-						System.out.println("currentlyBooked="+eventDetails.getCurrentlyBooked());
-						System.out.println("bookedCustomerIds="+eventDetails.getBookedCustomerIds().toString());
-					}
-				}
-				System.out.println("-----customerDB:"+eventOperationsImpl.getCustDB().toString());
-				for(String custId: eventOperationsImpl.getCustDB().keySet()){
-				System.out.println("customerId=="+custId);
-				Map<String, EventDetails> m = eventOperationsImpl.getCustDB().get(custId);
-					for(String eventId4: m.keySet()){
-						System.out.println("eventId:"+eventId4);
-					}
-				}
-				System.out.println("continue:");
-				flag = br.readLine();
-				System.out.println("flag==="+flag);
-			}
-		} catch(Exception e){
-			System.out.println(e);
-		}
-		
-	}
-
+	
 	public String getLocation(String id) {
 		return id.substring(0,3);
 	}
-	public String addEvent(String managerId, String eventId, String eventType, int bookingCapacity) throws RemoteException {
-
+	
+	public String addEvent(String managerId, String eventId, String eventType, int bookingCapacity){
 		Map<String, EventDetails> eventDetailsMap = new HashMap<String, EventDetails>();
 		Map<String, String> requestParams = new HashMap<String, String>();
 		String response;
@@ -120,7 +49,6 @@ public class EventOperationsImpl extends UnicastRemoteObject implements EventOpe
 		requestParams.put("eventType", eventType);
 		requestParams.put("bookingCapacity", Integer.toString(bookingCapacity));
 		requestParams.put("managerId", managerId);
-
 		if(eventDB.containsKey(eventType)) {
 			eventDetailsMap = eventDB.get(eventType);
 		} else {
@@ -143,7 +71,7 @@ public class EventOperationsImpl extends UnicastRemoteObject implements EventOpe
 		return response;
 	}
 	
-	public String removeEvent(String managerId, String eventId, String eventType) throws RemoteException {
+	public String removeEvent(String managerId, String eventId, String eventType){
 		Map<String, String> requestParams = new HashMap<String, String>();
 		String response;
 		Date requestDate = new Date();
@@ -182,7 +110,7 @@ public class EventOperationsImpl extends UnicastRemoteObject implements EventOpe
 		return response;
 	}
 	
-	public void addNextAvailable(String customerId, String eventType, String eventId) throws RemoteException {
+	public void addNextAvailable(String customerId, String eventType, String eventId){
 		if (eventDB.containsKey(eventType)) {
 			Map<String, EventDetails> eventMap = eventDB.get(eventType);
 			ArrayList<String> eventIds = new ArrayList<String>();
@@ -201,7 +129,7 @@ public class EventOperationsImpl extends UnicastRemoteObject implements EventOpe
 		}
 	}
 
-	public Map<String, EventDetails> listEventAvailability(String managerId, String eventType)throws RemoteException {
+	public String listEventAvailability(String managerId, String eventType){
 		Map<String, String> requestParams = new HashMap<String, String>();
 		String response;
 		Date requestDate = new Date();
@@ -209,28 +137,47 @@ public class EventOperationsImpl extends UnicastRemoteObject implements EventOpe
 		requestParams.put("managerId", managerId);
 		requestParams.put("requestType", RequestType.LIST_EVENT_AVAILABILITY);
 		String location = this.getLocation(managerId);
-		Map<String, EventDetails> eventDetailsMap = new HashMap<String, EventDetails>();
-		System.out.println("Here="+location);
-		System.out.println(location.equals(Locations.MTL));
+		List<String> events = new ArrayList<String>();
+		String[] eventsList;
 		if(!location.equals(Locations.MTL)) {
-			Map<String, EventDetails> events1 = (Map<String, EventDetails>)this.sendRequest(requestParams, Locations.MTL);
-			eventDetailsMap.putAll(events1);
+			String events1 = (String)this.sendRequest(requestParams, Locations.MTL);
+			eventsList = events1.split(",");
+			for(String event: eventsList) {
+				if(event.length()>0){
+					events.add(event);
+				}
+			}
 		}
 		if (!location.equals(Locations.QUE)) {
-			Map<String, EventDetails> events2 = (Map<String, EventDetails>)this.sendRequest(requestParams, Locations.QUE);
-			eventDetailsMap.putAll(events2);
+			String events2 = (String)this.sendRequest(requestParams, Locations.QUE);
+			eventsList = events2.split(",");
+			for(String event: eventsList) {
+				if(event.length()>0){
+					events.add(event);
+				}
+			}
 		}
 		if(!location.equals(Locations.SHE)) {
-			Map<String, EventDetails> events3 = (Map<String, EventDetails>)this.sendRequest(requestParams, Locations.SHE);
-			eventDetailsMap.putAll(events3);
+			String events3 = (String)this.sendRequest(requestParams, Locations.SHE);
+			eventsList = events3.split(",");
+			for(String event: eventsList) {
+				if(event.length()>0){
+					events.add(event);
+				}
+			}
 		}
-		Map<String, EventDetails> events4 = this.getServerEventsAvailable(eventType);
-		eventDetailsMap.putAll(events4);
-		Logs.logData(RequestType.LIST_EVENT_AVAILABILITY, requestParams, requestDate, 1, eventDetailsMap.toString());
-		return eventDetailsMap;
+		String events4 = this.getServerEventsAvailable(eventType);
+		eventsList = events4.split(",");
+		for(String event: eventsList) {
+			if(event.length()>0){
+				events.add(event);
+			}
+		}
+		Logs.logData(RequestType.LIST_EVENT_AVAILABILITY, requestParams, requestDate, 1, events.toString());
+		return events.toString();
 	}
 	
-	public Map<String, EventDetails> getServerEventsAvailable(String eventType) throws RemoteException{
+	public String getServerEventsAvailable(String eventType){
 		Map<String, EventDetails> eventDetailsMap = new HashMap<String, EventDetails>();
 		Map<String, EventDetails> availableEventDetailsMap = new HashMap<String, EventDetails>();
 		if(eventDB.containsKey(eventType)) {
@@ -242,10 +189,19 @@ public class EventOperationsImpl extends UnicastRemoteObject implements EventOpe
 				availableEventDetailsMap.put(eventId, eventDetails);
 			}
 		}
-		return availableEventDetailsMap;
+		String events = "";
+		for(String eventID: availableEventDetailsMap.keySet()) {
+			EventDetails eventDetails = eventDetailsMap.get(eventID);
+			if(events.length()>0)
+			events = events+","+(eventID+":"+eventDetails.getMaxBookingCapacity()+":"+eventDetails.getCurrentlyBooked());
+			else
+			events = (eventID+":"+eventDetails.getMaxBookingCapacity()+":"+eventDetails.getCurrentlyBooked());
+		}
+		return events;
 	}
 	
-	public String bookEvent(String customerId, String eventId, String eventType) throws RemoteException {
+	
+	public String bookEvent(String customerId, String eventId, String eventType){
 		Map<String, String> requestParams = new HashMap<String, String>();
 		String response;
 		Date requestDate = new Date();
@@ -256,10 +212,8 @@ public class EventOperationsImpl extends UnicastRemoteObject implements EventOpe
 		String customerLocation = this.getLocation(customerId);
 		String eventLocation = this.getLocation(eventId);
 		if (eventLocation.compareTo(customerLocation)!=0) {
-			System.out.println("Send  book event: "+eventLocation);
 			response = (String) this.sendRequest(requestParams, eventLocation);
 		} else {
-			System.out.println("Book server event: "+customerLocation);
 			response = this.bookServerEvent(customerId, eventId, eventType);
 		}
 		Logs.logData(RequestType.BOOK_EVENT, requestParams, requestDate, 1, response);
@@ -305,7 +259,7 @@ public class EventOperationsImpl extends UnicastRemoteObject implements EventOpe
 		return response;
 	}
 	
-	public List<String> getBookingSchedule(String customerId) throws RemoteException {
+	public String getBookingSchedule(String customerId) {
 		Map<String, String> requestParams = new HashMap<String, String>();
 		String response;
 		Date requestDate = new Date();
@@ -313,41 +267,64 @@ public class EventOperationsImpl extends UnicastRemoteObject implements EventOpe
 		requestParams.put("requestType", RequestType.GET_BOOKING_SCHEDULE);
 		String location = this.getLocation(customerId);
 		List<String> events = new ArrayList<String>();
+		String[] eventsList;
 		if(!location.equals(Locations.MTL)) {
-			List<String> events1 = (List<String>) this.sendRequest(requestParams, Locations.MTL);
-			events.addAll(events1);
+			String events1 = (String)this.sendRequest(requestParams, Locations.MTL);
+			eventsList = events1.split(",");
+			for(String event: eventsList) {
+				if(event.length()>0){
+					events.add(event);
+				}
+			}
 		}
 		
 		if(!location.equals(Locations.QUE)) {
-			List<String> events2 = (List<String>)this.sendRequest(requestParams, Locations.QUE);
-			System.out.println("events2=="+events.toString());
-			events.addAll(events2);
+			String events2 = (String)this.sendRequest(requestParams, Locations.QUE);
+			eventsList = events2.split(",");
+			for(String event: eventsList) {
+				if(event.length()>0) {
+					events.add(event);
+				}
+			}
 		}
 		
 		if(!location.equals(Locations.SHE)) {
-			List<String> events3 = (List<String>)this.sendRequest(requestParams, Locations.SHE);
-			events.addAll(events3);
+			String events3 = (String)this.sendRequest(requestParams, Locations.SHE);
+			eventsList = events3.split(",");
+			for(String event: eventsList) {
+				if(event.length()>0){
+					events.add(event);
+				}
+			}
 		}
-		List<String> events4 = this.getServerBookingSchedule(customerId);
-		events.addAll(events4);
-		
+		String events4 = (String)this.getServerBookingSchedule(customerId);
+		eventsList = events4.split(",");
+		for(String event: eventsList){
+			if(event.length()>0){
+				events.add(event);
+			}
+		}
 		Logs.logData(RequestType.GET_BOOKING_SCHEDULE, requestParams, requestDate, 1, events.toString());
-		return events;
+		return events.toString();
 	}
 	
-	public List<String> getServerBookingSchedule(String customerId) {
-		List<String> events = new ArrayList<String>();
+	public String getServerBookingSchedule(String customerId) {
+		String events = "";
 		String customerLocation = this.getLocation(customerId);
 		if(customerDB.containsKey(customerId)) {
 			Map<String, EventDetails> eventMap = customerDB.get(customerId);
 			for(String eventId: eventMap.keySet()) {
-				events.add(eventId);
+				if(events.length()>0) {
+					events = events+","+eventId;
+				} else {
+					events = eventId;
+				}
 			}
 		}
 		return events;
 	}
 	
-	public String cancelEvent(String customerId, String eventId, String eventType) throws RemoteException {
+	public String cancelEvent(String customerId, String eventId, String eventType) {
 		Map<String, String> requestParams = new HashMap<String, String>();
 		String response;
 		Date requestDate = new Date();
@@ -410,9 +387,10 @@ public class EventOperationsImpl extends UnicastRemoteObject implements EventOpe
 		Logs.logData(RequestType.CANCEL_SERVER_EVENT, logParams, requestDate, 1, response);
 		return response;
 	}
+	
 
 	public Object sendRequest(Map<String, String> requestParams, String location) {
-		System.out.println("UDP call to ===="+location);
+		System.out.println("UDP===="+location);
 		int port1 = 8002, port2 = 8007;
 		if (location.equals(Locations.MTL)) {
 			port1 = 8002;

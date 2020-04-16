@@ -7,6 +7,10 @@ import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.registry.*;
+import java.net.URL;
+import javax.xml.namespace.QName;
+import javax.xml.ws.*;
+
 public class UDPServer {
 
 	public static void main(String[] args) {		
@@ -34,24 +38,21 @@ public class UDPServer {
 					ByteArrayOutputStream b2 = new ByteArrayOutputStream();
 					ObjectOutputStream s2 = new ObjectOutputStream(b2);
 					if(requestType.equals(RequestType.LIST_EVENT_AVAILABILITY)) {
-						Map<String, EventDetails> events = obj.getServerEventsAvailable(requestParams.get("eventType"));
+						Object events = obj.getServerEventsAvailable(requestParams.get("eventType"));
 						s2.writeObject(events);
 					} else if(requestType.equals(RequestType.BOOK_EVENT)) {						
 						String book_event_response = obj.bookServerEvent(requestParams.get("customerId"), 
 																		 requestParams.get("eventId"), 
 																		 requestParams.get("eventType"));
 						s2.writeObject(book_event_response);
-						System.out.println("UDP: Book event response: "+book_event_response);
 					} else if(requestType.equals(RequestType.GET_BOOKING_SCHEDULE)) {
-						List<String> events = obj.getServerBookingSchedule(requestParams.get("customerId"));
+						String events = obj.getServerBookingSchedule(requestParams.get("customerId"));
 						s2.writeObject(events);
-						System.out.println("UDP: Booking schedule: "+events.toString());
 					} else if(requestType.equals(RequestType.CANCEL_EVENT)) {
 						String cancel_event_response = obj.cancelServerEvent(requestParams.get("customerId"), 
 																			 requestParams.get("eventId"), 
 																			 requestParams.get("eventType"));
 						s2.writeObject(cancel_event_response);
-						System.out.println("UDP: Cancel event response: "+cancel_event_response);
 					}
 
 					buffer = b2.toByteArray();
@@ -62,60 +63,38 @@ public class UDPServer {
 				aSocket.close();
 	    	}
 	    } catch(SocketException e){
-	    	System.out.println("Socket error in UDP server"+e.toString());
+	    	System.out.println("Socket error in UDP server "+e.toString());
 	    } catch(IOException e){
-	    	System.out.println("Socket error in UDP server"+e.toString());
+	    	System.out.println("Socket error in UDP server "+e.toString());
 	    } catch(Exception e) {
+			System.out.println("Exception: "+ e.toString());
 		}
 	}   
 	
 	public static EventOperations lookup(String location) throws RemoteException, Exception {
 		int port = 8000;
 		if(location.equals(Locations.MTL)) {
-			
-                 URL addURL=new URL("http://localhost:8000/DEMS?wsdl);
-                 QName addQname=new QName("http://imp.service.web.com/","DEMSImplementService");
-
-                 Service DEMS=Service.create(addURL,addQname);
-                 obj=DEMS.getPort(WebInterface.class);
-		} 
-                 else if(location.equals(Locations.QUE)) {
-
-	         URL addURL=new URL("http://localhost:8080/DEMS?wsdl);
-                 QName addQname=new QName("http://imp.service.web.com/","DEMSImplementService");
-
-                 Service DEMS=Service.create(addURL,addQname);
-                 obj=DEMS.getPort(WebInterface.class);
-
+			port = 8000;
+		} else if(location.equals(Locations.QUE)) {
+			port = 8080;
 		} else if(location.equals(Locations.SHE)) {
-			
-
-                 URL addURL=new URL("http://localhost:8081/DEMS?wsdl);
-                 QName addQname=new QName("http://imp.service.web.com/","DEMSImplementService");
-
-                 Service DEMS=Service.create(addURL,addQname);
-                 obj=DEMS.getPort(WebInterface.class);
-
+			port = 8081;
 		}
-		
+		URL addURL = new URL("http://localhost:"+port+"/test?wsdl");
+		QName addQname = new QName("http://localhost/test", "EventOperationsImplService");
+		Service service = Service.create(addURL, addQname);
+		EventOperations obj = service.getPort(EventOperations.class);
 		return obj;
 	}
 	
 	public static int getReceivePort(String location) {
 		int port = 8002;
 		if(location.equals(Locations.MTL)) {
-
-	         port=8002;
-
-
+			port = 8002;
 		} else if(location.equals(Locations.QUE)) {
- 			 
-                 port=8004;
-                 
+			port = 8004;     
 		} else if(location.equals(Locations.SHE)) {
-			
-                  port=8006;
-
+			port = 8006;
 		}
 		return port;
 	}

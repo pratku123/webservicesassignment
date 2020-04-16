@@ -4,7 +4,9 @@ import java.util.Map;
 import java.rmi.registry.*;
 import java.util.*;
 import java.io.*;
-
+import java.net.URL;
+import javax.xml.namespace.QName;
+import javax.xml.ws.*;
 public class Manager {
 
 	public static void main(String args[]) throws Exception{ 
@@ -91,32 +93,36 @@ public class Manager {
 					System.out.println("Invalid event type entered");
 					System.exit(0);
 				}
-
-				Map<String, EventDetails> events = obj.listEventAvailability(eventManagerID, eventType);
+				String events = obj.listEventAvailability(eventManagerID, eventType);
 				System.out.println("The events availability is as follows:");
-				int j=0;
-				for(String eventID: events.keySet()) {
+				int j=1;
+				String[] eventsList = events.split(",");
+				for(String row: eventsList) {
+					String eventRow[] = row.split(":");
+					System.out.print(j+". EventID:  "+eventRow[0]+", ");
+					System.out.println("Max booking capacity: "+eventRow[1]+
+					", Currently booked: "+eventRow[2]);
 					j++;
-					System.out.print(j+". EventID:  "+eventID+", ");
-					EventDetails eventDetails = events.get(eventID);
-					System.out.println("Max booking capacity: "+eventDetails.getMaxBookingCapacity()+
-					", Currently booked: "+eventDetails.getCurrentlyBooked());
 				}
+				break;
 	    }
 	}
 	
 	
 	public static EventOperations lookup(String managerLocation) throws Exception {   
-		int port=8000;
+		int port = 8000;
+		EventOperations obj = null;
 		if(managerLocation.equals(Locations.MTL)) {
-			port=8000;
+			port = 8000;
 		} else if(managerLocation.equals(Locations.QUE)) {
-			port=8080;
+			port = 8080;
 		} else if(managerLocation.equals(Locations.SHE)) {
-			port=8081;
+			port = 8081;
 		}
-		Registry registry = LocateRegistry.getRegistry(port);
-		EventOperations obj = (EventOperations)registry.lookup(managerLocation);
+		URL addURL =new URL("http://localhost:"+port+"/test?wsdl");
+		QName addQname =new QName("http://localhost/test","EventOperationsImplService");
+		Service service = Service.create(addURL, addQname);
+		obj = service.getPort(EventOperations.class);
 		return obj;
 	}
 }

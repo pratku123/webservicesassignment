@@ -1,13 +1,14 @@
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-
+import javax.xml.ws.Endpoint;
 public class Server {
 	public static void main(String args[]) throws Exception {   
 		try {    
-                        EventInterfaceImpl obj= new EventInterfaceImpl();
-                        String location = args[0];
+            EventOperationsImpl obj= new EventOperationsImpl();
+			String location = args[0];
 			int port = Server.getPort(location);
-			Endpoint.publish("http://localhost:9876/hw", obj);
+			String endPoint = "http://localhost:"+port+"/test";
+			Endpoint.publish(endPoint, obj);
 			System.out.println("Server started: "+location);
 
 	    } catch(Exception e) {

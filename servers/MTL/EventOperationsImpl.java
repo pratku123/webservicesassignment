@@ -304,8 +304,18 @@ public class EventOperationsImpl implements EventOperations {
 				events.add(event);
 			}
 		}
-		Logs.logData(RequestType.GET_BOOKING_SCHEDULE, requestParams, requestDate, 1, events.toString());
-		return events.toString();
+		int i=0,l=events.size();
+		String eventsResponse="";
+		for(String event: events) {
+			if(i<events.size()-1) {
+				eventsResponse+=event+",";
+			} else {
+				eventsResponse+=event;
+			}
+			i++;
+		}
+		Logs.logData(RequestType.GET_BOOKING_SCHEDULE, requestParams, requestDate, 1, eventsResponse);
+		return eventsResponse;
 	}
 	
 	public String getServerBookingSchedule(String customerId) {
@@ -387,7 +397,40 @@ public class EventOperationsImpl implements EventOperations {
 		Logs.logData(RequestType.CANCEL_SERVER_EVENT, logParams, requestDate, 1, response);
 		return response;
 	}
-	
+
+	public String swapEvent(String customerId, String removeEventType, String removeEventId, String bookEventType, String bookEventId) {
+		String bookingSchedule = this.getBookingSchedule(customerId);
+		String[] bookingScheduleList = bookingSchedule.split(",");
+		String removeEvent = removeEventId+":"+removeEventType;
+		Date requestDate = new Date();
+		Map<String, String> logParams = new HashMap<String, String>();
+		logParams.put("customerId", customerId);
+		logParams.put("removeEventType", removeEventType);
+		logParams.put("removeEventId", removeEventId);
+		logParams.put("bookEventType", bookEventType);
+		logParams.put("bookEventId", bookEventId);
+		int f=0;
+		for(String event: bookingScheduleList) {
+			if(event.equals(removeEvent)) {
+				f=1;
+				break;
+			}
+		}
+		String swapEventResponse="";
+		if(f==1) {
+			String bookEventResponse = this.bookEvent(customerId, bookEventId, bookEventType);
+			if(bookEventResponse.equals("SEAT_BOOKED")) {
+				String cancelEventResponse = this.cancelEvent(customerId, removeEventId, removeEventType);
+				swapEventResponse = cancelEventResponse;
+			} else {
+				swapEventResponse = bookEventResponse;
+			}
+		} else {
+			swapEventResponse = "REMOVE_EVENT_FAILED";
+		}
+		Logs.logData(RequestType.SWAP_EVENT, logParams, requestDate, 1, swapEventResponse);
+		return swapEventResponse;
+	}
 
 	public Object sendRequest(Map<String, String> requestParams, String location) {
 		System.out.println("UDP===="+location);

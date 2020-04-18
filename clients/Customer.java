@@ -14,7 +14,7 @@ public class Customer {
 		Customer.checkCustomerValid(customerId);
 	    EventOperations obj = lookup(customerLocation);
 
-	    System.out.println("Choose one option: 1.Book Event 2.Get booking schedule 3.Cancel Event");
+	    System.out.println("Choose one option: 1.Book Event 2.Get booking schedule 3.Cancel Event 4.Swap Event");
 	    int option = new Integer(br.readLine());
 	    
 	    int eventLocInt, eventTypeInt, eventSlotInt;
@@ -22,14 +22,8 @@ public class Customer {
 	    
 	    switch(option) {
 	    	case 1:
-				//System.out.println("Enter the event location to book: 1.MTL 2.QUE 3.SHE");
-				//eventLocInt = new Integer(br.readLine());
-
 				System.out.println("Enter the event type to book: 1.Conferences 2.Trade Shows 3.Seminars");
 				eventTypeInt = new Integer(br.readLine());
-
-				//System.out.println("Enter the event slot to book: 1.Morning 2.Afternoon 3.evening");
-				//eventSlotInt = new Integer(br.readLine());
 
 				if(eventTypeInt==1){
 					eventType="conferences";
@@ -109,7 +103,42 @@ public class Customer {
 				System.out.println("Enter the eventId to be cancelled");
 				eventId = br.readLine();
 				String cancelResult = obj.cancelEvent(customerId, eventId, eventType);
-				System.out.println("Result of cancelled event"+cancelResult);
+				System.out.println(cancelResult);
+				break;
+			case 4:
+				System.out.println("Enter remove event type: 1.Conferences 2.Trade Shows 3.Seminars");
+				eventTypeInt = new Integer(br.readLine());
+				if(eventTypeInt==1){
+					eventType="conferences";
+				} else if(eventTypeInt==2){
+					eventType="tradeshows";
+				} else if(eventTypeInt==3){
+					eventType="seminars";
+				} else{
+					System.out.println("event type error");
+					System.exit(0);
+				}
+				System.out.println("Enter the remove eventId:");
+				eventId = br.readLine();
+				String bookEventId, bookEventType="";
+				System.out.println("Enter book event type: 1.Conferences 2.Trade shows 3.Seminars");
+				eventTypeInt = new Integer(br.readLine());
+				if(eventTypeInt==1){
+					bookEventType="conferences";
+				} else if(eventTypeInt==2){
+					bookEventType="tradeshows";
+				} else if(eventTypeInt==3){
+					bookEventType="seminars";
+				} else {
+					System.out.println("event type error");
+					System.exit(0);
+				}
+				System.out.println("Enter book eventId:");
+				bookEventId = br.readLine();
+				String swapEventResponse = obj.swapEvent(customerId, eventType, eventId, bookEventType, bookEventId);
+				System.out.println(swapEventResponse);
+				break;
+			default:
 				break;
 	    }
 	}

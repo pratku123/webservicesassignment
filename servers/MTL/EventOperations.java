@@ -32,5 +32,6 @@ public interface EventOperations extends Remote {
 	public String getServerBookingSchedule(String customerId) ;
     @WebMethod
 	public String cancelServerEvent(String customerId, String eventId, String eventType);
+	@WebMethod
+	public String swapEvent(String customerId, String removeEventType, String removeEventId, String bookEventType, String bookEventId);
 }
-

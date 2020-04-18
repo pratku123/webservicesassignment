@@ -7,4 +7,5 @@ public class RequestType {
 	public static final String CANCEL_EVENT = "cancelEvent";
 	public static final String BOOK_SERVER_EVENT = "bookServerEvent";
 	public static final String CANCEL_SERVER_EVENT = "cancelServerEvent";
+	public static final String SWAP_EVENT = "swapEvent";
 } 

@@ -3,24 +3,23 @@ import java.io.*;
 import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.ws.*;
-public class Customer {
-	public static void main(String[]args) throws Exception {
-	
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		System.out.println("Enter the customer id:");
-		String customerId = br.readLine();
-		String customerLocation = customerId.substring(0,3);
-		System.out.println("Customer location: "+customerLocation);
-		Customer.checkCustomerValid(customerId);
-	    EventOperations obj = lookup(customerLocation);
 
-	    System.out.println("Choose one option: 1.Book Event 2.Get booking schedule 3.Cancel Event 4.Swap Event");
-	    int option = new Integer(br.readLine());
-	    
-	    int eventLocInt, eventTypeInt, eventSlotInt;
-	    String eventType="",getBookingScheduleResult, eventId="";
-	    
-	    switch(option) {
+public class Customer extends Thread{
+	public void run() {
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			System.out.println("Enter the customer id:");
+			String customerId = br.readLine();
+			String customerLocation = customerId.substring(0,3);
+			System.out.println("Customer location: "+customerLocation);
+			Customer.checkCustomerValid(customerId);
+			EventOperations obj = lookup(customerLocation);
+			System.out.println("Choose one option: 1.Book Event 2.Get booking schedule 3.Cancel Event 4.Swap Event");
+			int option = new Integer(br.readLine());
+			int eventLocInt, eventTypeInt, eventSlotInt;
+			String eventType="",getBookingScheduleResult, eventId="";
+
+			switch(option) {
 	    	case 1:
 				System.out.println("Enter the event type to book: 1.Conferences 2.Trade Shows 3.Seminars");
 				eventTypeInt = new Integer(br.readLine());
@@ -141,6 +140,9 @@ public class Customer {
 			default:
 				break;
 	    }
+		} catch(Exception e) {
+			System.out.println(e);
+		}
 	}
 	
 	public static void checkCustomerValid(String customerId) {

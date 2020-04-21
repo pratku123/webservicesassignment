@@ -7,23 +7,24 @@ import java.io.*;
 import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.ws.*;
-public class Manager {
 
-	public static void main(String args[]) throws Exception{ 
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		int i;
-		System.out.println("Enter Your Manager Id:");
-		String eventManagerID = br.readLine();
-		String managerLocation = eventManagerID.substring(0,3);
-		System.out.println("Manager location = "+managerLocation);
-		System.out.println("Choose one option: 1. Add Event 2. Remove event 3. List event availability");
-		i = new Integer(br.readLine());
-		EventOperations obj = lookup(managerLocation);
-		String eventId, eventType="";
-		int eventType1, eventSlot, bookingCapacity;
+public class Manager extends Thread{
+	public void run(){
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			int i;
+			System.out.println("Enter Your Manager Id:");
+			String eventManagerID = br.readLine();
+			String managerLocation = eventManagerID.substring(0,3);
+			System.out.println("Manager location = "+managerLocation);
+			System.out.println("Choose one option: 1. Add Event 2. Remove event 3. List event availability");
+			i = new Integer(br.readLine());
+			EventOperations obj = lookup(managerLocation);
+			String eventId, eventType="";
+			int eventType1, eventSlot, bookingCapacity;
 		
-		switch(i)
-		{
+			switch(i)
+			{
 			case 1:
 				System.out.println("Enter the event type: 1.Conferences 2.Trade Shows 3.Seminars");
 				eventType1 = new Integer(br.readLine());
@@ -106,6 +107,9 @@ public class Manager {
 				}
 				break;
 	    }
+		} catch(Exception e){
+			System.out.println(e);
+		}
 	}
 	
 	
